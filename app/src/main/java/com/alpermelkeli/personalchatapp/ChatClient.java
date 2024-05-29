@@ -5,17 +5,27 @@ import java.net.Socket;
 import android.os.Handler;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.alpermelkeli.personalchatapp.Model.Message;
+import com.alpermelkeli.personalchatapp.adapter.MessageAdapter;
+
+import java.util.List;
 public class ChatClient implements Runnable {
     private static final String SERVER_ADDRESS = "34.27.179.203"; // Sunucu adresini buraya yaz
     private static final int SERVER_PORT = 5050;
     private Handler mainHandler;
-    private TextView messageView;
+    private MessageAdapter messageAdapter;
+    private RecyclerView recyclerView;
+    private List<Message> messageList;
     private volatile boolean running = true;
     private PrintWriter out;
 
-    public ChatClient(Handler mainHandler, TextView messageView) {
+    public ChatClient(Handler mainHandler, List<Message> messageList, MessageAdapter messageAdapter, RecyclerView recyclerView) {
         this.mainHandler = mainHandler;
-        this.messageView = messageView;
+        this.messageList = messageList;
+        this.messageAdapter = messageAdapter;
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -60,7 +70,9 @@ public class ChatClient implements Runnable {
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            messageView.append(finalMessage + "\n");
+                            messageList.add(new Message(finalMessage));
+                            messageAdapter.notifyItemInserted(messageList.size() - 1);
+                            recyclerView.scrollToPosition(messageList.size() - 1);
                         }
                     });
                 }
